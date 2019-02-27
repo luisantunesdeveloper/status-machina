@@ -5,7 +5,7 @@
 ## Install
 
 ```sh
-git clone https://github.com/luisantunesdeveloper/status-machina.gitt
+git clone https://github.com/luisantunesdeveloper/status-machina.git
 cd status-machina && npm i
 ```
 

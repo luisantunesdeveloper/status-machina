@@ -5,11 +5,20 @@
 ## Install
 
 ```sh
+npm i status-machina
+```
+
+## Development
+
+open a pull request when you're ready.  
+don't forget to add your tests.
+
+```sh
 git clone https://github.com/luisantunesdeveloper/status-machina.git
 cd status-machina && npm i
 ```
 
-## Tests
+### Tests
 
 ```sh
 npm test

@@ -4,7 +4,7 @@ import { test } from 'tape';
 import { spy } from 'sinon';
 import { StateMachine } from '../lib/stateMachine';
 
-test('fsm startup', suite => {
+test('fsm', suite => {
   const config = (onS1, onS2, afterS1, beforeS1) => ({
     s1: {
       on: onS1,
@@ -30,7 +30,7 @@ test('fsm startup', suite => {
     },
   });
 
-  test('sync callbacks', sync => {
+  test('with callbacks', sync => {
     const argsS2 = {
       prop2: 'value2',
     };
@@ -51,7 +51,7 @@ test('fsm startup', suite => {
       console.log('on s2, before s1');
     };
 
-    test('it should have states defined', t => {
+    test('should have states defined', t => {
       t.plan(4);
 
       const myConfig = config(onS1);
@@ -63,11 +63,11 @@ test('fsm startup', suite => {
       t.end();
     });
 
-    test('a state should have on listeners', t => {
+    test('should have listeners on a state', t => {
       t.plan(2);
 
       const spyOnS1 = spy(onS1);
-      const myConfig = config(spyOnS1, onS2, afterS1, beforeS1);
+      const myConfig = config(spyOnS1, onS2);
       const sm = new StateMachine(myConfig, 's1');
       myConfig.s2.on(argsS2);
       t.isNot(sm.states.s1.on, undefined, 's1 state on listener is defined');
@@ -75,13 +75,13 @@ test('fsm startup', suite => {
       t.end();
     });
 
-    test('a state can have before actions to execute', t => {
+    test('can execute actions before entering a state', t => {
       t.plan(4);
 
       const spyOnS1 = spy(onS1);
       const spyOnS2 = spy(onS2);
       const spyBeforeS1 = spy(beforeS1);
-      const myConfig = config(spyOnS1, spyOnS2, afterS1, spyBeforeS1);
+      const myConfig = config(spyOnS1, spyOnS2, undefined, spyBeforeS1);
       const sm = new StateMachine(myConfig, 's1');
       myConfig.s2.on(argsS2);
       t.isEqual(
@@ -99,13 +99,13 @@ test('fsm startup', suite => {
       t.end();
     });
 
-    test('a state can have after actions to execute', t => {
+    test('can execute actions after entering a state', t => {
       t.plan(4);
 
       const spyOnS1 = spy(onS1);
       const spyOnS2 = spy(onS2);
       const spyAfterS1 = spy(afterS1);
-      const myConfig = config(spyOnS1, spyOnS2, spyAfterS1, beforeS1);
+      const myConfig = config(spyOnS1, spyOnS2, spyAfterS1);
       const sm = new StateMachine(myConfig, 's1');
       myConfig.s2.on(argsS2);
       t.isEqual(

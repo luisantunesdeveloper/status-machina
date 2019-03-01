@@ -21,4 +21,4 @@ npm run test:watch
 
 ## License
 
-MIT © [Luís Antunes]()
+MIT © Luís Antunes

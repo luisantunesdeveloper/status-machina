@@ -108,6 +108,27 @@ test('Moore state-machine', suite => {
       t.end();
     });
 
+    test('cannot do a transition to an inexistent state', t => {
+      t.plan(1);
+
+      const states = config();
+      delete states.s2;
+      const sm = new StateMachine();
+      sm.config(states)('s1').init();
+
+      try {
+        sm.transition('s1', 's2');
+      } catch (error) {
+        t.isEqual(
+          error.message,
+          's2 does not exist!',
+          'cannot do a transition to a non-existent state'
+        );
+      }
+
+      t.end();
+    });
+
     test('can do a transition to a new state', t => {
       t.plan(2);
 
@@ -142,6 +163,214 @@ test('Moore state-machine', suite => {
 
       t.end();
     });
+
+    test('can attach a listener to a state', t => {
+      t.plan(1);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s2', '1', () => {});
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        1,
+        'state s2 has one observer'
+      );
+
+      t.end();
+    });
+
+    test('can dettach a listener from a state', t => {
+      t.plan(1);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s2', '1', () => {})
+        .dettach('s2', '1');
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        0,
+        'state s2 has zero observers'
+      );
+
+      t.end();
+    });
+
+    test('can attach more than a listener to a state', t => {
+      t.plan(1);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s2', '1', () => {})
+        .attach('s2', '2', () => {});
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        2,
+        'state s2 has two observers'
+      );
+
+      t.end();
+    });
+
+    test('can dettach more than a listener from a state', t => {
+      t.plan(1);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s2', '1', () => {})
+        .attach('s2', '2', () => {})
+        .dettach('s2', '1')
+        .dettach('s2', '2');
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        0,
+        'state s2 has zero observers'
+      );
+
+      t.end();
+    });
+
+    test('can attach one listener to different states', t => {
+      t.plan(2);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s1', '1', () => {})
+        .attach('s2', '2', () => {});
+
+      t.isEqual(
+        Object.keys(sm.observers['s1']).length,
+        1,
+        'state s1 has one observer'
+      );
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        1,
+        'state s2 has one observer'
+      );
+
+      t.end();
+    });
+
+    test('can dettach one listener from different states', t => {
+      t.plan(2);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s1', '1', () => {})
+        .attach('s2', '2', () => {})
+        .dettach('s1', '1')
+        .dettach('s1', '2');
+
+      t.isEqual(
+        Object.keys(sm.observers['s1']).length,
+        0,
+        'state s1 has zero observers'
+      );
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        1,
+        'state s2 has zero observers'
+      );
+
+      t.end();
+    });
+
+    test('can attach more than one listener to different states', t => {
+      t.plan(2);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s1', '1', () => {})
+        .attach('s1', '2', () => {})
+        .attach('s2', '1', () => {})
+        .attach('s2', '2', () => {});
+
+      t.isEqual(
+        Object.keys(sm.observers['s1']).length,
+        2,
+        'state s1 has two observers'
+      );
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        2,
+        'state s2 has two observers'
+      );
+
+      t.end();
+    });
+
+    test('can dettach more than one listener from different states', t => {
+      t.plan(2);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s1', '1', () => {})
+        .attach('s1', '2', () => {})
+        .attach('s2', '1', () => {})
+        .attach('s2', '2', () => {})
+        .dettach('s1', '1')
+        .dettach('s1', '2')
+        .dettach('s2', '1')
+        .dettach('s2', '2');
+
+      t.isEqual(
+        Object.keys(sm.observers['s1']).length,
+        0,
+        'state s1 has two observers'
+      );
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        0,
+        'state s2 has two observers'
+      );
+
+      t.end();
+    });
+
+    test('can notify state listeners on state transitions', t => {
+      t.plan(2);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s1', '1', () => {})
+        .attach('s1', '2', () => {})
+        .attach('s2', '1', () => {
+          t.pass('s2 observer, id 1 got called');
+        })
+        .attach('s2', '2', () => {
+          t.pass('s2 observer, id 2 got called');
+        });
+
+      sm.transition('s1', 's2');
+
+      t.end();
+    });
+
     sync.end();
   });
 

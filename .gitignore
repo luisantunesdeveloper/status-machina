@@ -4,3 +4,4 @@ dist*
 npm-debug.log
 results.json
 .DS_Store
+.nyc_output

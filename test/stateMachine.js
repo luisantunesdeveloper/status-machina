@@ -39,7 +39,7 @@ test('Moore state-machine', suite => {
 
     const beforeS1 = args => args;
 
-    test('should have states defined', t => {
+    test('can have states defined', t => {
       t.plan(4);
 
       const states = config();
@@ -53,7 +53,7 @@ test('Moore state-machine', suite => {
       t.end();
     });
 
-    test('should fire actions on a state', t => {
+    test('can execute actions on a state', t => {
       t.plan(2);
 
       const spyOnS1 = spy(onS1);
@@ -68,14 +68,13 @@ test('Moore state-machine', suite => {
       t.end();
     });
 
-    test('can execute actions before entering a state', t => {
+    test('can execute actions before a transition', t => {
       t.plan(2);
 
-      const spyOnS1 = spy(onS1);
       const spyOnS2 = spy(onS2);
       const spyBeforeS1 = spy(beforeS1);
 
-      const states = config(spyOnS1, spyOnS2, undefined, spyBeforeS1);
+      const states = config(undefined, spyOnS2, undefined, spyBeforeS1);
       const sm = new StateMachine();
       sm.config(states)('s1').init();
 
@@ -84,18 +83,18 @@ test('Moore state-machine', suite => {
         1,
         'child states can have before actions to execute'
       );
-      t.isEqual(spyOnS1.calledOnce, true, 'onS1 is called once');
+      sm.transition('s1', 's2');
+      t.isEqual(spyBeforeS1.calledOnce, true, 'spyBeforeS1 is called once');
       t.end();
     });
 
-    test('can execute actions after entering a state', t => {
+    test('can execute actions after a transition', t => {
       t.plan(2);
 
-      const spyOnS1 = spy(onS1);
       const spyOnS2 = spy(onS2);
       const spyAfterS1 = spy(afterS1);
 
-      const states = config(spyOnS1, spyOnS2, spyAfterS1);
+      const states = config(undefined, spyOnS2, spyAfterS1);
       const sm = new StateMachine();
       sm.config(states)('s1').init();
 
@@ -104,7 +103,8 @@ test('Moore state-machine', suite => {
         1,
         'child states can have after actions to execute'
       );
-      t.isEqual(spyOnS1.calledOnce, true, 'onS1 is called once');
+      sm.transition('s1', 's2');
+      t.isEqual(spyAfterS1.calledOnce, true, 'spyAfterS1 is called once');
       t.end();
     });
 

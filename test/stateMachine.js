@@ -4,7 +4,7 @@ import { spy } from 'sinon';
 import { test } from 'tape';
 import { StateMachine } from '../lib/stateMachine';
 
-test('Moore state-machine', suite => {
+test('state-machine', suite => {
   const config = (onS1, onS2, afterS1, beforeS1) => ({
     s1: {
       on: onS1,
@@ -83,7 +83,7 @@ test('Moore state-machine', suite => {
         1,
         'child states can have before actions to execute'
       );
-      sm.transition('s1', 's2');
+      sm.transition('s2');
       t.isEqual(spyBeforeS1.calledOnce, true, 'spyBeforeS1 is called once');
       t.end();
     });
@@ -103,7 +103,7 @@ test('Moore state-machine', suite => {
         1,
         'child states can have after actions to execute'
       );
-      sm.transition('s1', 's2');
+      sm.transition('s2');
       t.isEqual(spyAfterS1.calledOnce, true, 'spyAfterS1 is called once');
       t.end();
     });
@@ -117,7 +117,7 @@ test('Moore state-machine', suite => {
       sm.config(states)('s1').init();
 
       try {
-        sm.transition('s1', 's2');
+        sm.transition('s2');
       } catch (error) {
         t.isEqual(
           error.message,
@@ -137,7 +137,7 @@ test('Moore state-machine', suite => {
       sm.config(states)('s1').init();
 
       t.isEqual(sm.getState(), 's1', 'state is the initial state s1');
-      sm.transition('s1', 's2');
+      sm.transition('s2');
       t.isEqual(sm.getState(), 's2', 'state transitioned from s1 to s2');
 
       t.end();
@@ -153,7 +153,7 @@ test('Moore state-machine', suite => {
       sm.config(states)('s1').init();
 
       t.isEqual(sm.getState(), 's1', 'state is the initial state s1');
-      sm.transition('s1', 's1');
+      sm.transition('s1');
       t.isEqual(
         spyOnS1.calledTwice,
         true,
@@ -286,7 +286,7 @@ test('Moore state-machine', suite => {
       t.isEqual(
         Object.keys(sm.observers['s2']).length,
         1,
-        'state s2 has zero observers'
+        'state s2 has one observer'
       );
 
       t.end();
@@ -338,13 +338,13 @@ test('Moore state-machine', suite => {
       t.isEqual(
         Object.keys(sm.observers['s1']).length,
         0,
-        'state s1 has two observers'
+        'state s1 has zero observers'
       );
 
       t.isEqual(
         Object.keys(sm.observers['s2']).length,
         0,
-        'state s2 has two observers'
+        'state s2 has zero observers'
       );
 
       t.end();
@@ -366,7 +366,31 @@ test('Moore state-machine', suite => {
           t.pass('s2 observer, id 2 got called');
         });
 
-      sm.transition('s1', 's2');
+      sm.transition('s2');
+
+      t.end();
+    });
+
+    test('can dettach every listener from a state', t => {
+      t.plan(1);
+
+      const states = config();
+      const sm = new StateMachine();
+      sm.config(states)('s1')
+        .init()
+        .attach('s1', '1', () => {})
+        .attach('s1', '2', () => {})
+        .attach('s2', '1', () => {})
+        .attach('s2', '2', () => {})
+        .dettachState('s2');
+
+      sm.transition('s2');
+
+      t.isEqual(
+        Object.keys(sm.observers['s2']).length,
+        0,
+        'state s2 has zero observers'
+      );
 
       t.end();
     });

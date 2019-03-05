@@ -3,15 +3,14 @@
 class StateMachine {
   currentState;
   initialState;
-  observers = {};
   states;
 
   attach(state, observerId, callback) {
-    if (!this.observers[state]) {
-      this.observers[state] = {};
+    if (!this.states[state].on) {
+      this.states[state].on = {};
     }
 
-    this.observers[state][observerId] = callback;
+    this.states[state].on[observerId] = callback;
     return this;
   }
 
@@ -21,13 +20,13 @@ class StateMachine {
   }
 
   dettach(state, observerId) {
-    delete this.observers[state][observerId];
+    delete this.states[state].on[observerId];
     return this;
   }
 
   dettachState(state) {
-    for (const observerId in this.observers[state]) {
-      delete this.observers[state][observerId];
+    for (const observerId in this.states[state].on) {
+      delete this.states[state].on[observerId];
     }
     return this;
   }
@@ -53,17 +52,18 @@ class StateMachine {
   }
 
   init() {
-    this._transition(undefined, this.initialState, {});
+    this._transition(undefined, this.initialState);
     return this;
   }
 
   _notifyStateListeners(state) {
     if (
-      this.observers[state] &&
-      Object.keys(this.observers[state]).length > 0
+      this.states[state] &&
+      this.states[state].on &&
+      Object.keys(this.states[state].on).length > 0
     ) {
-      for (const observerId in this.observers[state]) {
-        this.observers[state][observerId]();
+      for (const observerId in this.states[state].on) {
+        this.states[state].on[observerId]();
       }
     }
     return this;
@@ -93,10 +93,6 @@ class StateMachine {
       this._executeActionsByActionType(fromState, toState, 'before');
     }
 
-    // execute action on state
-    if (this.states[toState].on) {
-      this.states[toState].on();
-    }
     // set the new current state
     this.currentState = toState;
     this._notifyStateListeners(toState);

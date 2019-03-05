@@ -5,9 +5,8 @@ import { test } from 'tape';
 import { StateMachine } from '../src/stateMachine';
 
 test('state-machine', suite => {
-  const config = (onS1, onS2, afterS1, beforeS1) => ({
+  const config = (afterS1, beforeS1) => ({
     s1: {
-      on: onS1,
       s2: {
         after: [
           {
@@ -21,20 +20,10 @@ test('state-machine', suite => {
         ],
       },
     },
-    s2: {
-      on: onS2,
-    },
+    s2: {},
   });
 
   test('with callbacks', sync => {
-    const argsS2 = {
-      prop2: 'value2',
-    };
-
-    const onS1 = args => args;
-
-    const onS2 = args => args;
-
     const afterS1 = args => args;
 
     const beforeS1 = args => args;
@@ -53,28 +42,12 @@ test('state-machine', suite => {
       t.end();
     });
 
-    test('can execute actions on a state', t => {
-      t.plan(2);
-
-      const spyOnS1 = spy(onS1);
-
-      const states = config(spyOnS1, onS2);
-      const sm = new StateMachine();
-      sm.config(states)('s1').init();
-
-      states.s2.on(argsS2);
-      t.isNot(sm.states.s1.on, undefined, 's1 state on action is defined');
-      t.isEqual(spyOnS1.calledOnce, true, 'onS1 is called once');
-      t.end();
-    });
-
     test('can execute actions before a transition', t => {
       t.plan(2);
 
-      const spyOnS2 = spy(onS2);
       const spyBeforeS1 = spy(beforeS1);
 
-      const states = config(undefined, spyOnS2, undefined, spyBeforeS1);
+      const states = config(undefined, spyBeforeS1);
       const sm = new StateMachine();
       sm.config(states)('s1').init();
 
@@ -91,10 +64,9 @@ test('state-machine', suite => {
     test('can execute actions after a transition', t => {
       t.plan(2);
 
-      const spyOnS2 = spy(onS2);
       const spyAfterS1 = spy(afterS1);
 
-      const states = config(undefined, spyOnS2, spyAfterS1);
+      const states = config(spyAfterS1);
       const sm = new StateMachine();
       sm.config(states)('s1').init();
 
@@ -144,21 +116,14 @@ test('state-machine', suite => {
     });
 
     test('can do a transition to the same state', t => {
-      t.plan(3);
+      t.plan(2);
 
-      const spyOnS1 = spy(onS1);
-
-      const states = config(spyOnS1);
+      const states = config();
       const sm = new StateMachine();
       sm.config(states)('s1').init();
 
       t.isEqual(sm.getState(), 's1', 'state is the initial state s1');
       sm.transition('s1');
-      t.isEqual(
-        spyOnS1.calledTwice,
-        true,
-        'onS1 is called twice, once during init and other during the transition'
-      );
       t.isEqual(sm.getState(), 's1', 'state transitioned from s1 to s1');
 
       t.end();
@@ -173,7 +138,7 @@ test('state-machine', suite => {
         .init()
         .attach('s2', '1', () => {});
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         1,
         'state s2 has one observer'
       );
@@ -192,7 +157,7 @@ test('state-machine', suite => {
         .dettach('s2', '1');
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         0,
         'state s2 has zero observers'
       );
@@ -211,7 +176,7 @@ test('state-machine', suite => {
         .attach('s2', '2', () => {});
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         2,
         'state s2 has two observers'
       );
@@ -232,7 +197,7 @@ test('state-machine', suite => {
         .dettach('s2', '2');
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         0,
         'state s2 has zero observers'
       );
@@ -251,13 +216,13 @@ test('state-machine', suite => {
         .attach('s2', '2', () => {});
 
       t.isEqual(
-        Object.keys(sm.observers['s1']).length,
+        Object.keys(sm.states['s1'].on).length,
         1,
         'state s1 has one observer'
       );
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         1,
         'state s2 has one observer'
       );
@@ -278,13 +243,13 @@ test('state-machine', suite => {
         .dettach('s1', '2');
 
       t.isEqual(
-        Object.keys(sm.observers['s1']).length,
+        Object.keys(sm.states['s1'].on).length,
         0,
         'state s1 has zero observers'
       );
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         1,
         'state s2 has one observer'
       );
@@ -305,13 +270,13 @@ test('state-machine', suite => {
         .attach('s2', '2', () => {});
 
       t.isEqual(
-        Object.keys(sm.observers['s1']).length,
+        Object.keys(sm.states['s1'].on).length,
         2,
         'state s1 has two observers'
       );
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         2,
         'state s2 has two observers'
       );
@@ -336,13 +301,13 @@ test('state-machine', suite => {
         .dettach('s2', '2');
 
       t.isEqual(
-        Object.keys(sm.observers['s1']).length,
+        Object.keys(sm.states['s1'].on).length,
         0,
         'state s1 has zero observers'
       );
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         0,
         'state s2 has zero observers'
       );
@@ -387,7 +352,7 @@ test('state-machine', suite => {
       sm.transition('s2');
 
       t.isEqual(
-        Object.keys(sm.observers['s2']).length,
+        Object.keys(sm.states['s2'].on).length,
         0,
         'state s2 has zero observers'
       );

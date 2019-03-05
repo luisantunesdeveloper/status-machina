@@ -1,6 +1,6 @@
 {
   "name": "status-machina",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "state machine",
   "author": {
     "name": "Luis Antunes",
@@ -8,9 +8,9 @@
   },
   "repository": "https://github.com/luisantunesdeveloper/status-machina.git",
   "license": "MIT",
-  "main": "dist",
+  "main": "lib",
   "files": [
-    "dist"
+    "lib"
   ],
   "keywords": [
     "fsm",
@@ -34,13 +34,13 @@
     "watch": "^1.0.2"
   },
   "scripts": {
-    "build": "babel lib --out-dir dist",
+    "build": "babel src --out-dir lib",
     "test": "cross-env NODE_ENV=test nyc --reporter=lcov --require @babel/register tape test/**/*.js | tap-spec; nyc report ---reporter=text",
-    "test:watch": "watch 'npm test' test lib"
+    "test:watch": "watch 'npm test' test src"
   },
   "nyc": {
     "include": [
-      "lib/**"
+      "src/**"
     ]
   }
 }

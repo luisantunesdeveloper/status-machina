@@ -2,7 +2,7 @@
 
 import { spy } from 'sinon';
 import { test } from 'tape';
-import { StateMachine } from '../lib/stateMachine';
+import { StateMachine } from '../src/stateMachine';
 
 test('state-machine', suite => {
   const config = (onS1, onS2, afterS1, beforeS1) => ({

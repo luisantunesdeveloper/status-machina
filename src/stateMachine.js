@@ -2,6 +2,7 @@
 
 class StateMachine {
   currentState;
+  data;
   initialState;
   states;
 
@@ -41,7 +42,7 @@ class StateMachine {
       // parallel or sequential
       for (const actionType of this.states[fromState][toState][actionType]) {
         if (actionType.on) {
-          actionType.on();
+          this.data = actionType.on(this.data);
         }
       }
     }
@@ -51,7 +52,8 @@ class StateMachine {
     return this.currentState;
   }
 
-  init() {
+  init(initData) {
+    this.data = initData;
     this._transition(undefined, this.initialState);
     return this;
   }
@@ -63,7 +65,7 @@ class StateMachine {
       Object.keys(this.states[state].on).length > 0
     ) {
       for (const observerId in this.states[state].on) {
-        this.states[state].on[observerId]();
+        this.states[state].on[observerId](this.data);
       }
     }
     return this;
@@ -95,12 +97,14 @@ class StateMachine {
 
     // set the new current state
     this.currentState = toState;
-    this._notifyStateListeners(toState);
 
     // after actions to execute
     if (this.states[fromState]) {
       this._executeActionsByActionType(fromState, toState, 'after');
     }
+
+    // notify every state listener
+    this._notifyStateListeners(toState);
     return this;
   }
 }

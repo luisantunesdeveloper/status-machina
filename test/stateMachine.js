@@ -20,7 +20,16 @@ test('state-machine', suite => {
         ],
       },
     },
-    s2: {},
+    s2: {
+      s3: {
+        after: [
+          {
+            on: afterS1,
+          },
+        ],
+      },
+    },
+    s3: {},
   });
 
   test('with callbacks', sync => {
@@ -360,7 +369,154 @@ test('state-machine', suite => {
       t.end();
     });
 
+    test('can pass data all the way to the state listeners without any changes', t => {
+      t.plan(1);
+
+      const states = config();
+      const sm = new StateMachine();
+      const initData = { prop1: 'value1' };
+      sm.config(states)('s1')
+        .init(initData)
+        .attach('s2', '1', observedData => {
+          t.isEqual(
+            initData,
+            observedData,
+            'observed data is equal to init data'
+          );
+        });
+
+      sm.transition('s2');
+
+      t.end();
+    });
+
+    test('can pass data all the way to the state listeners with changes before a transition', t => {
+      t.plan(1);
+
+      const before = data => {
+        data.prop1 = 'value2';
+        return data;
+      };
+
+      const states = config(undefined, before);
+      const sm = new StateMachine();
+      const initData = { prop1: 'value1' };
+      sm.config(states)('s1')
+        .init(initData)
+        .attach('s2', '1', observedData => {
+          t.isEqual(
+            observedData.prop1,
+            'value2',
+            'observed data was changed before the callback'
+          );
+        });
+
+      sm.transition('s2');
+
+      t.end();
+    });
+
+    test('can pass data all the way to the state listeners with changes after a transition', t => {
+      t.plan(1);
+
+      const after = data => {
+        data.prop1 = 'value2';
+        return data;
+      };
+
+      const states = config(after);
+      const sm = new StateMachine();
+      const initData = { prop1: 'value1' };
+      sm.config(states)('s1')
+        .init(initData)
+        .attach('s2', '1', observedData => {
+          t.isEqual(
+            observedData.prop1,
+            'value2',
+            'observed data was changed after the callback'
+          );
+        });
+
+      sm.transition('s2');
+
+      t.end();
+    });
+
     sync.end();
+  });
+
+  test('can pass data all the way to the state listeners with changes before and after a transition', t => {
+    t.plan(2);
+
+    const after = data => {
+      data.prop1 = 'value3';
+      data.prop2 = 'value1';
+      return data;
+    };
+
+    const before = data => {
+      data.prop1 = 'value2';
+      return data;
+    };
+
+    const states = config(after, before);
+    const sm = new StateMachine();
+    const initData = { prop1: 'value1' };
+    sm.config(states)('s1')
+      .init(initData)
+      .attach('s2', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          'value3',
+          'observed data was changed before and after the callback'
+        );
+
+        t.isEqual(
+          observedData.prop2,
+          'value1',
+          'observed data was changed before and after the callback'
+        );
+      });
+
+    sm.transition('s2');
+
+    t.end();
+  });
+
+  test('can pass data all the way to the state listeners with changes after each transition', t => {
+    t.plan(2);
+
+    let i = 0;
+
+    const after = data => {
+      data.prop1 = ++i;
+      return data;
+    };
+
+    const states = config(after);
+    const sm = new StateMachine();
+    const initData = { prop1: 'value1' };
+    sm.config(states)('s1')
+      .init(initData)
+      .attach('s2', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          1,
+          'observed data was changed after the callback'
+        );
+      })
+      .attach('s3', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          2,
+          'observed data was changed after the callback'
+        );
+      });
+
+    sm.transition('s2');
+    sm.transition('s3');
+
+    t.end();
   });
 
   suite.end();

@@ -519,5 +519,83 @@ test('state-machine', suite => {
     t.end();
   });
 
+  test('can pass data all the way to the state listeners with changes after each transition with promises', t => {
+    t.plan(2);
+
+    let i = 0;
+
+    const after = data =>
+      new Promise(resolve => {
+        const dataInPromise = (data.prop1 = ++i);
+        setTimeout(() => {
+          resolve(dataInPromise);
+        }, 0);
+      });
+
+    const states = config(after);
+    const sm = new StateMachine();
+    const initData = { prop1: 'value1' };
+    sm.config(states)('s1')
+      .init(initData)
+      .attach('s2', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          1,
+          'observed data was changed after the callback'
+        );
+      })
+      .attach('s3', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          2,
+          'observed data was changed after the callback'
+        );
+      });
+
+    sm.transition('s2');
+    sm.transition('s3');
+
+    t.end();
+  });
+
+  test('can pass data all the way to the state listeners with changes before and after each transition with promises', t => {
+    t.plan(2);
+
+    let i = 0;
+
+    const changeState = data =>
+      new Promise(resolve => {
+        const dataInPromise = (data.prop1 = ++i);
+        setTimeout(() => {
+          resolve(dataInPromise);
+        }, 0);
+      });
+
+    const states = config(changeState, changeState);
+    const sm = new StateMachine();
+    const initData = { prop1: 'value1' };
+    sm.config(states)('s1')
+      .init(initData)
+      .attach('s2', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          2,
+          'observed data was changed after the callback'
+        );
+      })
+      .attach('s3', '1', observedData => {
+        t.isEqual(
+          observedData.prop1,
+          3,
+          'observed data was changed after the callback'
+        );
+      });
+
+    sm.transition('s2');
+    sm.transition('s3');
+
+    t.end();
+  });
+
   suite.end();
 });

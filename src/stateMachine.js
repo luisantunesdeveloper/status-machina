@@ -32,17 +32,15 @@ class StateMachine {
     return this;
   }
 
-  _executeActionsByActionType(fromState, toState, actionType) {
+  async _executeActionsByActionType(fromState, toState, actionType) {
     if (
       this.states[fromState][toState] &&
       this.states[fromState][toState][actionType] &&
       this.states[fromState][toState][actionType].length > 0
     ) {
-      // TODO: if async need to await for it
-      // parallel or sequential
       for (const actionType of this.states[fromState][toState][actionType]) {
         if (actionType.on) {
-          this.data = actionType.on(this.data);
+          this.data = await actionType.on(this.data);
         }
       }
     }

@@ -1,6 +1,6 @@
 {
   "name": "status-machina",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "state machine",
   "author": {
     "name": "Luis Antunes",
@@ -22,9 +22,7 @@
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.3",
     "@babel/node": "^7.2.2",
-    "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/preset-env": "^7.3.1",
-    "@babel/register": "^7.0.0",
     "babel-preset-es2015": "^6.24.1",
     "cross-env": "^5.2.0",
     "nyc": "^13.3.0",
@@ -35,7 +33,7 @@
   },
   "scripts": {
     "build": "babel src --out-dir lib",
-    "test": "cross-env NODE_ENV=test nyc --reporter=lcov --require @babel/register tape test/**/*.js | tap-spec; nyc report ---reporter=text",
+    "test": "cross-env NODE_ENV=test nyc --reporter=lcov tape test/**/*.js | tap-spec; nyc report ---reporter=text",
     "test:watch": "watch 'npm test' test src"
   },
   "nyc": {

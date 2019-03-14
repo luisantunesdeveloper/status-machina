@@ -1,3 +1,3 @@
 'use strict';
 
-import stateMachine from './stateMachine';
+const stateMachine = require('./stateMachine');

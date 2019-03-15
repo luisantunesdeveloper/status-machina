@@ -41,7 +41,7 @@ test('state-machine', suite => {
       t.end();
     });
 
-    test('can execute actions before a transition', t => {
+    test('can execute actions before a transition', async t => {
       t.plan(2);
 
       const spyBeforeS1 = spy(beforeS1);
@@ -55,7 +55,7 @@ test('state-machine', suite => {
         1,
         'child states can have before actions to execute'
       );
-      sm.transition('s2');
+      await sm.transition('s2');
       t.isEqual(spyBeforeS1.calledOnce, true, 'spyBeforeS1 is called once');
       t.end();
     });
@@ -90,11 +90,60 @@ test('state-machine', suite => {
       try {
         await sm.transition('s2');
       } catch (error) {
-        console.log('here');
         t.isEqual(
           error.message,
           's2 does not exist!',
           'cannot do a transition to a non-existent state'
+        );
+      }
+
+      t.end();
+    });
+
+    test('cannot do a transition to an error occurred while executing a function before', async t => {
+      t.plan(1);
+      const errorMessage = 'error message here';
+      const before = () =>
+        new Promise((resolve, reject) => {
+          reject(new Error(errorMessage));
+        });
+
+      const states = config(undefined, before);
+      const sm = new StateMachine();
+      sm.config(states)('s1').init();
+
+      try {
+        await sm.transition('s2');
+      } catch (error) {
+        t.isEqual(
+          error.message,
+          errorMessage,
+          'error is captured while executing a function'
+        );
+      }
+
+      t.end();
+    });
+
+    test('cannot do a transition to an error occurred while executing a function after', async t => {
+      t.plan(1);
+      const errorMessage = 'error message here';
+      const after = () =>
+        new Promise((resolve, reject) => {
+          reject(new Error(errorMessage));
+        });
+
+      const states = config(after);
+      const sm = new StateMachine();
+      sm.config(states)('s1').init();
+
+      try {
+        await sm.transition('s2');
+      } catch (error) {
+        t.isEqual(
+          error.message,
+          errorMessage,
+          'error is captured while executing a function'
         );
       }
 

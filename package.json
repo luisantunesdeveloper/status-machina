@@ -17,7 +17,9 @@
     "state machine",
     "status-machina"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "bluebird": "^3.5.3"
+  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.3",

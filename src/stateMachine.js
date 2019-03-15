@@ -1,5 +1,8 @@
 'use strict';
 
+const bluebird = require('bluebird');
+const map = bluebird.map;
+
 class StateMachine {
   attach(state, observerId, callback) {
     if (!this.states[state].on) {
@@ -33,15 +36,12 @@ class StateMachine {
       this.states[fromState][toState][actionType] &&
       this.states[fromState][toState][actionType].length > 0
     ) {
-      const actions = this.states[fromState][toState][actionType].map(
-        async action => {
-          if (action) {
-            this.data = await action(this.data);
-          }
-          return action;
+      return map(this.states[fromState][toState][actionType], async action => {
+        if (action) {
+          this.data = await action(this.data);
         }
-      );
-      return actions;
+        return action;
+      });
     }
     return Promise.all([]);
   }
@@ -90,11 +90,7 @@ class StateMachine {
 
     // before actions to execute
     if (this.states[fromState]) {
-      try {
-        await this._executeActionsByActionType(fromState, toState, 'before');
-      } catch (error) {
-        // throw error;
-      }
+      await this._executeActionsByActionType(fromState, toState, 'before');
     }
 
     // set the new current state
@@ -102,11 +98,7 @@ class StateMachine {
 
     // after actions to execute
     if (this.states[fromState]) {
-      try {
-        await this._executeActionsByActionType(fromState, toState, 'after');
-      } catch (error) {
-        // throw error;
-      }
+      await this._executeActionsByActionType(fromState, toState, 'after');
     }
 
     // notify every state listener

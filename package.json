@@ -1,6 +1,6 @@
 {
   "name": "status-machina",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "state machine",
   "author": {
     "name": "Luis Antunes",
@@ -8,9 +8,10 @@
   },
   "repository": "https://github.com/luisantunesdeveloper/status-machina.git",
   "license": "MIT",
-  "main": "lib",
+  "main": "src",
   "files": [
-    "lib"
+    "lib",
+    "src"
   ],
   "keywords": [
     "fsm",

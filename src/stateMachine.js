@@ -30,6 +30,20 @@ class StateMachine {
     return this;
   }
 
+  getState() {
+    return this.currentState;
+  }
+
+  init(initData) {
+    this.data = initData;
+    this._transition(undefined, this.initialState);
+    return this;
+  }
+
+  async transition(toState) {
+    return await this._transition(this.currentState, toState);
+  }
+
   _executeActionsByActionType(fromState, toState, actionType) {
     if (
       this.states[fromState][toState] &&
@@ -44,16 +58,6 @@ class StateMachine {
       });
     }
     return Promise.all([]);
-  }
-
-  getState() {
-    return this.currentState;
-  }
-
-  init(initData) {
-    this.data = initData;
-    this._transition(undefined, this.initialState);
-    return this;
   }
 
   _notifyStateListeners(state) {
@@ -79,10 +83,6 @@ class StateMachine {
     return this;
   }
 
-  async transition(toState) {
-    return await this._transition(this.currentState, toState);
-  }
-
   async _transition(fromState, toState) {
     if (!this.states[toState]) {
       throw new Error(`${toState} does not exist!`);
@@ -103,7 +103,10 @@ class StateMachine {
 
     // notify every state listener
     this._notifyStateListeners(toState);
-    return Promise.resolve(this.currentState, this.data);
+    return Promise.resolve({
+      currentState: this.currentState,
+      data: this.data,
+    });
   }
 }
 

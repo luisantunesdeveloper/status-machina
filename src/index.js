@@ -1,3 +1,6 @@
 'use strict';
 
-export { StateMachine } from './stateMachine';
+const sm = require('../src/stateMachine');
+const StateMachine = sm.StateMachine;
+
+module.exports = StateMachine;

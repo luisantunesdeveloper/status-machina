@@ -1,0 +1,23 @@
+{
+  "name": "react-status-machina-example",
+  "version": "0.0.1",
+  "description": "status-machina react usage",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Luis Antunes",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/polyfill": "^7.2.5",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "parcel-bundler": "^1.12.2"
+  }
+}

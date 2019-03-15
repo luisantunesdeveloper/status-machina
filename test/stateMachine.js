@@ -503,14 +503,14 @@ test('state-machine', suite => {
         t.isEqual(
           observedData.prop1,
           2,
-          'observed data was changed after the transtion to state s2'
+          'observed data was changed after the transition to state s2'
         );
       })
       .attach('s3', '1', observedData => {
         t.isEqual(
           observedData.prop1,
           3,
-          'observed data was changed after the transtion to state s3'
+          'observed data was changed after the transition to state s3'
         );
       });
 

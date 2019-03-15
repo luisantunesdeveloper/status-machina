@@ -10,8 +10,8 @@ npm i status-machina
 
 ## Development
 
-open a pull request when you're ready.  
-don't forget to add your tests.
+Open a pull request when you're ready.  
+Don't forget to add your tests.
 
 ```sh
 git clone https://github.com/luisantunesdeveloper/status-machina.git
@@ -27,6 +27,10 @@ npm test
 ```sh
 npm run test:watch
 ```
+
+### Examples
+
+Go to examples directory.
 
 ## License
 

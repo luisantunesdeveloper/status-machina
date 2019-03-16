@@ -1,6 +1,5 @@
 'use strict';
 
-const sm = require('../src/stateMachine');
-const StateMachine = sm.StateMachine;
+const StateMachine = require('./stateMachine');
 
 module.exports = StateMachine;

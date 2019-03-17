@@ -2,6 +2,8 @@
 
 > a device that can be in one of a set number of stable conditions depending on its previous condition and on the present values of its inputs
 
+Although the citation, for now we only have Moore state machines.
+
 ## Install
 
 ```sh

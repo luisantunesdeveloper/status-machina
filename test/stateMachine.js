@@ -9,17 +9,28 @@ const test = tape.test;
 test('state-machine', suite => {
   const config = (afterS1, beforeS1) => ({
     s1: {
+      // on: {
+      //   actions: [],
+      // },
+      s1: {}, // same state transition
       s2: {
         after: [afterS1],
         before: [beforeS1],
       },
     },
     s2: {
+      // on: {
+      //   actions: [],
+      // },
       s3: {
         after: [afterS1],
       },
     },
-    s3: {},
+    s3: {
+      // on: {
+      //   actions: [],
+      // },
+    },
   });
 
   const afterS1 = args => args;
@@ -37,6 +48,26 @@ test('state-machine', suite => {
     t.isEqual(sm.initialState, 's1', 'initial state s1 is defined');
     t.isNot(sm.states.s1, undefined, 's1 state is defined');
     t.isNot(sm.states.s2, undefined, 's2 state is defined');
+    t.end();
+  });
+
+  test('can execute actions on a transition', async t => {
+    t.plan(2);
+
+    const _spy = spy(args => args);
+
+    const states = config();
+    states.s2.on = { actions: [_spy] };
+    const sm = new StateMachine();
+    sm.config(states)('s1').init();
+
+    t.isEqual(
+      sm.states.s1.s2.after.length,
+      1,
+      'child states can have after actions to execute'
+    );
+    await sm.transition('s2');
+    t.isEqual(_spy.calledOnce, true, 'spy is called once');
     t.end();
   });
 
@@ -127,6 +158,63 @@ test('state-machine', suite => {
     t.end();
   });
 
+  test('cannot do a transition to the same state if not defined', async t => {
+    t.plan(2);
+
+    const states = config();
+    const sm = new StateMachine();
+    sm.config(states)('s2').init();
+
+    t.isEqual(sm.getState(), 's2', 'state is the initial state s1');
+    try {
+      await sm.transition('s2');
+    } catch (error) {
+      t.isEqual(
+        error.message,
+        's2 does not exist as a possible transition!',
+        'state cannot have a transition to itself if not defined'
+      );
+    }
+
+    t.end();
+  });
+
+  test('can be ready to have listeners attached', t => {
+    t.plan(1);
+
+    const states = config();
+    delete states.s2.on;
+    const sm = new StateMachine();
+    sm.config(states)('s1')
+      .attach('s2', '1', () => {})
+      .init();
+    t.isEqual(
+      sm.states['s2'].on === undefined,
+      false,
+      'state s2 on prop is defined'
+    );
+
+    t.end();
+  });
+
+  test('can be ready to have listeners attached', t => {
+    t.plan(1);
+
+    const states = config();
+    delete states.s2.on;
+    const sm = new StateMachine();
+    sm.config(states)('s1')
+      .attach('s2', '1', () => {})
+      .init();
+    t.isEqual(
+      sm.states['s2'].on.observers === undefined,
+      false,
+      'state s2 on.observers prop is defined'
+    );
+
+    t.end();
+  });
+
   test('can attach a listener to a state', t => {
     t.plan(1);
 
@@ -136,7 +224,7 @@ test('state-machine', suite => {
       .init()
       .attach('s2', '1', () => {});
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       1,
       'state s2 has one observer'
     );
@@ -155,7 +243,7 @@ test('state-machine', suite => {
       .dettach('s2', '1');
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       0,
       'state s2 has zero observers'
     );
@@ -174,7 +262,7 @@ test('state-machine', suite => {
       .attach('s2', '2', () => {});
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       2,
       'state s2 has two observers'
     );
@@ -195,7 +283,7 @@ test('state-machine', suite => {
       .dettach('s2', '2');
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       0,
       'state s2 has zero observers'
     );
@@ -214,13 +302,13 @@ test('state-machine', suite => {
       .attach('s2', '2', () => {});
 
     t.isEqual(
-      Object.keys(sm.states['s1'].on).length,
+      Object.keys(sm.states['s1'].on.observers).length,
       1,
       'state s1 has one observer'
     );
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       1,
       'state s2 has one observer'
     );
@@ -241,13 +329,13 @@ test('state-machine', suite => {
       .dettach('s1', '2');
 
     t.isEqual(
-      Object.keys(sm.states['s1'].on).length,
+      Object.keys(sm.states['s1'].on.observers).length,
       0,
       'state s1 has zero observers'
     );
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       1,
       'state s2 has one observer'
     );
@@ -268,13 +356,13 @@ test('state-machine', suite => {
       .attach('s2', '2', () => {});
 
     t.isEqual(
-      Object.keys(sm.states['s1'].on).length,
+      Object.keys(sm.states['s1'].on.observers).length,
       2,
       'state s1 has two observers'
     );
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       2,
       'state s2 has two observers'
     );
@@ -299,13 +387,13 @@ test('state-machine', suite => {
       .dettach('s2', '2');
 
     t.isEqual(
-      Object.keys(sm.states['s1'].on).length,
+      Object.keys(sm.states['s1'].on.observers).length,
       0,
       'state s1 has zero observers'
     );
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       0,
       'state s2 has zero observers'
     );
@@ -350,7 +438,7 @@ test('state-machine', suite => {
     await sm.transition('s2');
 
     t.isEqual(
-      Object.keys(sm.states['s2'].on).length,
+      Object.keys(sm.states['s2'].on.observers).length,
       0,
       'state s2 has zero observers'
     );

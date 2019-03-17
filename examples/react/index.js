@@ -3,9 +3,6 @@
  * and descriptive state management, without too much
  * boilerplate.
  *
- * A Web application can easily be handled with
- * Meanly machines which outputs on transitions.
- *
  * In this case every time a click is made a
  * transition is triggered calling the listeners
  * at the end of the transition. That includes

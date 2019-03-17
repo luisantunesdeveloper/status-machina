@@ -128,7 +128,7 @@ class StateMachine {
       await this._executeActionsByActionType(fromState, toState, 'before');
     }
 
-    this._setCurrentState(toState);
+    await this._setCurrentState(toState);
 
     // after actions to execute
     if (this.states[fromState]) {

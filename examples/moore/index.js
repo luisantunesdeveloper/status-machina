@@ -12,7 +12,6 @@ const action = data =>
   new Promise(resolve => {
     setTimeout(() => {
       data.inc = ++data.inc;
-      console.log(data);
       resolve(data);
     }, 0);
   });

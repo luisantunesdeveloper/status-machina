@@ -41,14 +41,17 @@ const getConfig = beforeSecondState => ({
       before: [beforeSecondState],
     },
   },
-  secondState: {},
+  secondState: {
+    firstState: {},
+  },
 });
 
 // create a new state machine
 // with states, initial state and
 // state changes observers
 const sm = new StateMachine();
-const states = getConfig(new Services().getUser);
+const beforeSecondState = new Services().getUser;
+const states = getConfig(beforeSecondState);
 sm.config(states)('firstState');
 
 class SMExample extends React.Component {

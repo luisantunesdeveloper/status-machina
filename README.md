@@ -2,7 +2,21 @@
 
 > a device that can be in one of a set number of stable conditions depending on its previous condition and on the present values of its inputs
 
-Although the citation, for now we only have Moore state machines.
+## State machines types
+
+Although the citation, for now status-machina has the following machines and features implemented. If appropriate an example will be given.
+
+### Moore machines
+
+- [x] States and transitions
+- [x] States produces output
+
+[Moore example](https://github.com/luisantunesdeveloper/status-machina/blob/master/examples/moore/index.js)
+
+### Other features
+
+- [x] Broadcast communication (events)
+- [x] Actions (Before, After)
 
 ## Install
 

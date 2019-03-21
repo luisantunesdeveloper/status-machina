@@ -6,7 +6,7 @@ const StateMachine = require('../src/stateMachine');
 const spy = sinon.spy;
 const test = tape.test;
 
-test('state-machine', suite => {
+test('generic', generic => {
   const config = (afterS1, beforeS1) => ({
     s1: {
       // on: {
@@ -658,5 +658,97 @@ test('state-machine', suite => {
     t.end();
   });
 
-  suite.end();
+  generic.end();
+});
+
+test('moore', moore => {
+  const outputFn0 = data =>
+    new Promise(resolve => {
+      resolve(data + '0');
+    });
+
+  const outputFn1 = data =>
+    new Promise(resolve => {
+      resolve(data + '1');
+    });
+
+  const config = {
+    // initial: 's0',
+    // inputs: ['0', '1'],
+    s0: {
+      on: {
+        outputs: outputFn0,
+      },
+      s1: {},
+    },
+    s1: {
+      on: {
+        outputs: outputFn0,
+      },
+      s1: {},
+      s2: {},
+    },
+    s2: {
+      on: {
+        outputs: outputFn1,
+      },
+    },
+  };
+
+  test('can execute a transition on a moore state machine', async t => {
+    t.plan(2);
+
+    const _spy = spy(outputFn0);
+
+    config.s1.on = { outputs: _spy };
+
+    const sm = new StateMachine();
+
+    sm.configMoore(config)('s1').init('');
+
+    await sm.transition('s1');
+    t.isEqual(_spy.calledOnce, true, 'spy is called once');
+    t.isEqual(sm.data, '0', 'data for the state is changed');
+    t.end();
+  });
+
+  test('can execute more than one transition on a moore state machine', async t => {
+    t.plan(1);
+
+    const _spy = spy(outputFn0);
+
+    config.s1.on = { outputs: _spy };
+
+    const sm = new StateMachine();
+
+    sm.configMoore(config)('s1').init('');
+
+    await sm.transition('s1');
+    await sm.transition('s2');
+    t.isEqual(sm.data, '01', 'data for the state is changed');
+    t.end();
+  });
+
+  test('can execute more than one transition on a moore state machine', async t => {
+    t.plan(1);
+
+    delete config.s1.on.outputs;
+
+    const sm = new StateMachine();
+
+    sm.configMoore(config)('s1').init('');
+
+    try {
+      await sm.transition('s1');
+    } catch (error) {
+      t.isEqual(
+        error.message,
+        's1 does should have outputs property defined!',
+        'cannot do a transition to a state without outpus configuration'
+      );
+    }
+    t.end();
+  });
+
+  moore.end();
 });

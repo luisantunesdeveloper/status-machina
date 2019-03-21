@@ -3,6 +3,10 @@
 const bluebird = require('bluebird');
 const map = bluebird.map;
 
+const types = {
+  moore: 'moore',
+};
+
 class StateMachine {
   attach(state, observerId, callback) {
     if (!this.states[state].on) {
@@ -15,6 +19,11 @@ class StateMachine {
 
     this.states[state].on.observers[observerId] = callback;
     return this;
+  }
+
+  configMoore(states) {
+    this.type = types.moore;
+    return this.config(states);
   }
 
   config(states) {
@@ -50,7 +59,20 @@ class StateMachine {
   }
 
   async transition(toState) {
+    if (this.type && this.type === types.moore) {
+      return await this._transitionMoore(this.currentState, toState);
+    }
     return await this._transition(this.currentState, toState);
+  }
+
+  _basicSanitization(fromState, toState) {
+    if (!this.states[toState]) {
+      throw new Error(`${toState} does not exist!`);
+    }
+
+    if (fromState && toState && !this.states[fromState][toState]) {
+      throw new Error(`${toState} does not exist as a possible transition!`);
+    }
   }
 
   /**
@@ -78,6 +100,20 @@ class StateMachine {
     return Promise.all([]);
   }
 
+  _executeTransition(toState, actions = []) {
+    this.currentState = toState;
+    if (actions.length > 0) {
+      return this._executeActions(actions);
+    }
+    return Promise.all([]);
+  }
+
+  _mooreSanitization(toState) {
+    if (!this.states[toState].on || !this.states[toState].on.outputs) {
+      throw new Error(`${toState} does should have outputs property defined!`);
+    }
+  }
+
   _notifyStateListeners(state) {
     if (
       this.states[state] &&
@@ -92,18 +128,6 @@ class StateMachine {
     return this;
   }
 
-  _setCurrentState(toState) {
-    this.currentState = toState;
-    if (
-      this.states[toState] &&
-      this.states[toState].on &&
-      this.states[toState].on.actions
-    ) {
-      return this._executeActions(this.states[toState].on.actions);
-    }
-    return Promise.all([]);
-  }
-
   _setInitialState(initialState) {
     this.initialState = initialState;
     return this;
@@ -114,23 +138,34 @@ class StateMachine {
     return this;
   }
 
+  async _transitionMoore(fromState, toState) {
+    this._basicSanitization(fromState, toState);
+    this._mooreSanitization(toState);
+
+    // execute the transaction
+    await this._executeTransition(toState, [this.states[toState].on.outputs]);
+
+    return Promise.resolve({
+      currentState: this.currentState,
+      data: this.data,
+    });
+  }
+
   async _transition(fromState, toState) {
-    if (!this.states[toState]) {
-      throw new Error(`${toState} does not exist!`);
-    }
+    this._basicSanitization(fromState, toState);
 
-    if (fromState && toState && !this.states[fromState][toState]) {
-      throw new Error(`${toState} does not exist as a possible transition!`);
-    }
-
-    // before actions to execute
+    // actions to execute before the transaction
     if (this.states[fromState]) {
       await this._executeActionsByActionType(fromState, toState, 'before');
     }
 
-    await this._setCurrentState(toState);
+    // execute the transaction
+    await this._executeTransition(
+      toState,
+      this.states[toState].on && this.states[toState].on.actions
+    );
 
-    // after actions to execute
+    // actions to execute after the transaction
     if (this.states[fromState]) {
       await this._executeActionsByActionType(fromState, toState, 'after');
     }

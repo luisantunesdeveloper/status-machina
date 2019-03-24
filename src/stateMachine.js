@@ -1,7 +1,6 @@
 'use strict';
 
-const bluebird = require('bluebird');
-const map = bluebird.map;
+const Promise = require('bluebird');
 
 const types = {
   moore: 'moore',
@@ -81,7 +80,7 @@ class StateMachine {
    * @param {*} actions
    */
   _executeActions(actions) {
-    return map(actions, async action => {
+    return Promise.map(actions, async action => {
       if (action) {
         this.data = await action(this.data);
       }

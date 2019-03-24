@@ -12,6 +12,7 @@ Although the citation, for now status-machina has the following machines and fea
 - [x] States produces output
 
 [Moore example](https://github.com/luisantunesdeveloper/status-machina/blob/master/examples/moore/index.js)
+[Todo example](https://github.com/luisantunesdeveloper/status-machina/blob/master/examples/todo/src)
 
 ### Other features
 

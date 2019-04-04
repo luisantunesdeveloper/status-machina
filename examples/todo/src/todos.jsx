@@ -17,6 +17,8 @@ export default class Todos extends React.Component {
       description: event.currentTarget[0].value,
       completed: false,
     });
+    // the following line is not needed, just to fire up render of the current state
+    this.setState(store.data);
     await store.transition('addTodo');
     store.states.listTodos.on.outputs = getTodos(store.data.filter);
     await store.transition('listTodos');
@@ -38,6 +40,8 @@ export default class Todos extends React.Component {
   async listFilteredTodos(event) {
     store.data.filter = event.currentTarget.id;
     store.states.listTodos.on.outputs = getTodos(event.currentTarget.id);
+    // the following line is not needed, just to fire up render of the current state
+    this.setState(store.data);
     await store.transition('listTodos');
     this.setState(store.data);
   }
@@ -60,6 +64,7 @@ export default class Todos extends React.Component {
   renderFilters() {
     return (
       <div>
+        <span>Filters: </span>
         <label htmlFor="none">None</label>
         <input
           id="none"
@@ -89,11 +94,15 @@ export default class Todos extends React.Component {
     return (
       <React.Fragment>
         <form onSubmit={this.addTodo}>
-          <label htmlFor="todoName">What's happening:</label>
+          <label htmlFor="todoName">
+            Add a todo (press enter at the end):{' '}
+          </label>
           <input id="todoName" type="text" name="todoName" />
         </form>
         <ul style={{ listStyleType: 'none' }}>{this.renderTodosList()}</ul>
         {this.renderFilters()}
+        <br />
+        <div>Current state: {store.currentState}</div>
       </React.Fragment>
     );
   }

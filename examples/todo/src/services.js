@@ -1,12 +1,5 @@
 export const initData = {
-  todos: [
-    {
-      completed: false,
-      description: 'buy milk',
-      id: 0,
-      show: true,
-    },
-  ],
+  todos: [],
 };
 
 export const getTodos = async filterBy => {
@@ -46,7 +39,7 @@ export const postTodo = async todo => {
         const newTodo = Object.assign(todo, { id: data.todos.length });
         data.todos.push(newTodo);
         resolve(data);
-      }, 1000);
+      }, 4000);
     });
   };
 };

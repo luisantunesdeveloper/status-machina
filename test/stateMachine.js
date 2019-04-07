@@ -752,3 +752,98 @@ test('moore', moore => {
 
   moore.end();
 });
+
+test('mealy', moore => {
+  const outputFn0 = data =>
+    new Promise(resolve => {
+      resolve(data + '0');
+    });
+
+  const outputFn1 = data =>
+    new Promise(resolve => {
+      resolve(data + '1');
+    });
+
+  const config = {
+    // initial: 's0',
+    // inputs: ['0', '1'],
+    s0: {
+      on: {},
+      s1: {
+        on: {
+          outputs: outputFn0,
+        },
+      },
+    },
+    s1: {
+      on: {},
+      s2: {
+        on: {
+          outputs: outputFn1,
+        },
+      },
+    },
+    s2: {
+      on: {},
+    },
+  };
+
+  test('can execute a transition on a mealy state machine', async t => {
+    t.plan(2);
+
+    const _spy = spy(outputFn0);
+
+    config.s0.s1.on = { outputs: _spy };
+
+    const sm = new StateMachine();
+
+    sm.configMealy(config)('s0').init('');
+
+    await sm.transition('s1');
+    t.isEqual(_spy.calledOnce, true, 'spy is called once');
+    t.isEqual(sm.data, '0', 'data for the state is changed');
+    t.end();
+  });
+
+  test('can execute more than one transition on a moore state machine', async t => {
+    t.plan(1);
+
+    const _spy0 = spy(outputFn0);
+    const _spy1 = spy(outputFn1);
+
+    config.s0.s1.on = { outputs: _spy0 };
+    config.s1.s2.on = { outputs: _spy1 };
+
+    const sm = new StateMachine();
+
+    sm.configMealy(config)('s0').init('');
+
+    await sm.transition('s1');
+    await sm.transition('s2');
+    t.isEqual(sm.data, '01', 'data for the state is changed');
+    t.end();
+  });
+
+  test('can execute more than one transition on a moore state machine', async t => {
+    t.plan(1);
+
+    delete config.s0.s1.on.outputs;
+
+    const sm = new StateMachine();
+
+    sm.configMoore(config)('s0').init('');
+
+    try {
+      await sm.transition('s1');
+    } catch (error) {
+      t.isEqual(
+        error.message,
+        's1 does should have outputs property defined!',
+        'cannot do a transition to a state without outpus configuration'
+      );
+    }
+    t.end();
+  });
+
+  moore.end();
+});

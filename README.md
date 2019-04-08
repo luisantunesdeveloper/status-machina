@@ -14,6 +14,11 @@ Although the citation, for now status-machina has the following machines and fea
 [Moore example](https://github.com/luisantunesdeveloper/status-machina/blob/master/examples/moore/index.js)
 [Todo example](https://github.com/luisantunesdeveloper/status-machina/blob/master/examples/todo/src)
 
+### Mealy machines
+
+- [x] States and transitions
+- [x] Transitions produces output dependent on input
+
 ### Other features
 
 - [x] Broadcast communication (events)

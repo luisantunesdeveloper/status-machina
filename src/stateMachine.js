@@ -3,6 +3,7 @@
 const Promise = require('bluebird');
 
 const types = {
+  mealy: 'mealy',
   moore: 'moore',
 };
 
@@ -18,6 +19,11 @@ class StateMachine {
 
     this.states[state].on.observers[observerId] = callback;
     return this;
+  }
+
+  configMealy(states) {
+    this.type = types.mealy;
+    return this.config(states);
   }
 
   configMoore(states) {
@@ -60,6 +66,9 @@ class StateMachine {
   async transition(toState) {
     if (this.type && this.type === types.moore) {
       return await this._transitionMoore(this.currentState, toState);
+    }
+    if (this.type && this.type === types.mealy) {
+      return await this._transitionMealy(this.currentState, toState);
     }
     return await this._transition(this.currentState, toState);
   }
@@ -107,8 +116,8 @@ class StateMachine {
     return Promise.all([]);
   }
 
-  _mooreSanitization(toState) {
-    if (!this.states[toState].on || !this.states[toState].on.outputs) {
+  _outputSanitization(toState, config) {
+    if (!config.on || !config.on.outputs) {
       throw new Error(`${toState} does should have outputs property defined!`);
     }
   }
@@ -139,10 +148,25 @@ class StateMachine {
 
   async _transitionMoore(fromState, toState) {
     this._basicSanitization(fromState, toState);
-    this._mooreSanitization(toState);
+    this._outputSanitization(toState, this.states[toState]);
 
     // execute the transaction
     await this._executeTransition(toState, [this.states[toState].on.outputs]);
+
+    return Promise.resolve({
+      currentState: this.currentState,
+      data: this.data,
+    });
+  }
+
+  async _transitionMealy(fromState, toState) {
+    this._basicSanitization(fromState, toState);
+    this._outputSanitization(toState, this.states[fromState][toState]);
+
+    // execute the transaction
+    await this._executeTransition(toState, [
+      this.states[fromState][toState].on.outputs,
+    ]);
 
     return Promise.resolve({
       currentState: this.currentState,

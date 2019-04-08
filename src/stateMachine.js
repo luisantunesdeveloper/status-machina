@@ -63,12 +63,12 @@ class StateMachine {
     return this;
   }
 
-  async transition(toState) {
+  async transition(toState, input) {
     if (this.type && this.type === types.moore) {
       return await this._transitionMoore(this.currentState, toState);
     }
     if (this.type && this.type === types.mealy) {
-      return await this._transitionMealy(this.currentState, toState);
+      return await this._transitionMealy(this.currentState, toState, input);
     }
     return await this._transition(this.currentState, toState);
   }
@@ -122,6 +122,18 @@ class StateMachine {
     }
   }
 
+  _inputSanitization(fromState, toState, input) {
+    if (
+      !this.states[fromState][toState] ||
+      !this.states[fromState][toState].on ||
+      !this.states[fromState][toState].on[input]
+    ) {
+      throw new Error(
+        `Transition from ${fromState} to ${toState} does not have matching inputs!`
+      );
+    }
+  }
+
   _notifyStateListeners(state) {
     if (
       this.states[state] &&
@@ -159,13 +171,13 @@ class StateMachine {
     });
   }
 
-  async _transitionMealy(fromState, toState) {
+  async _transitionMealy(fromState, toState, input) {
     this._basicSanitization(fromState, toState);
-    this._outputSanitization(toState, this.states[fromState][toState]);
+    this._inputSanitization(fromState, toState, input);
 
     // execute the transaction
     await this._executeTransition(toState, [
-      this.states[fromState][toState].on.outputs,
+      this.states[fromState][toState].on[input],
     ]);
 
     return Promise.resolve({

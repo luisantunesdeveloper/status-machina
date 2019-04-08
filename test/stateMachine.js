@@ -757,7 +757,7 @@ test('mealy', moore => {
       on: {},
       s1: {
         on: {
-          outputs: outputFn0,
+          input0: outputFn0,
         },
       },
     },
@@ -765,7 +765,7 @@ test('mealy', moore => {
       on: {},
       s2: {
         on: {
-          outputs: outputFn1,
+          input1: outputFn1,
         },
       },
     },
@@ -774,58 +774,58 @@ test('mealy', moore => {
     },
   };
 
-  test('can execute a transition on a mealy state machine', async t => {
+  test('can execute a transition on a mealy mealy machine', async t => {
     t.plan(2);
 
     const _spy = spy(outputFn0);
 
-    config.s0.s1.on = { outputs: _spy };
+    config.s0.s1.on = { input0: _spy };
 
     const sm = new StateMachine();
 
     sm.configMealy(config)('s0').init('');
 
-    await sm.transition('s1');
+    await sm.transition('s1', 'input0');
     t.isEqual(_spy.calledOnce, true, 'spy is called once');
     t.isEqual(sm.data, '0', 'data for the state is changed');
     t.end();
   });
 
-  test('can execute more than one transition on a moore state machine', async t => {
+  test('can execute more than one transition on a mealy state machine', async t => {
     t.plan(1);
 
     const _spy0 = spy(outputFn0);
     const _spy1 = spy(outputFn1);
 
-    config.s0.s1.on = { outputs: _spy0 };
-    config.s1.s2.on = { outputs: _spy1 };
+    config.s0.s1.on = { input0: _spy0 };
+    config.s1.s2.on = { input1: _spy1 };
 
     const sm = new StateMachine();
 
     sm.configMealy(config)('s0').init('');
 
-    await sm.transition('s1');
-    await sm.transition('s2');
+    await sm.transition('s1', 'input0');
+    await sm.transition('s2', 'input1');
     t.isEqual(sm.data, '01', 'data for the state is changed');
     t.end();
   });
 
-  test('can execute more than one transition on a moore state machine', async t => {
+  test('can execute more than one transition on a mealy state machine', async t => {
     t.plan(1);
 
-    delete config.s0.s1.on.outputs;
+    delete config.s0.s1.on.input0;
 
     const sm = new StateMachine();
 
-    sm.configMoore(config)('s0').init('');
+    sm.configMealy(config)('s0').init('');
 
     try {
-      await sm.transition('s1');
+      await sm.transition('s1', 'input0');
     } catch (error) {
       t.isEqual(
         error.message,
-        's1 does should have outputs property defined!',
-        'cannot do a transition to a state without outpus configuration'
+        'Transition from s0 to s1 does not have matching inputs!',
+        'cannot do a transition to a state without matching inputs'
       );
     }
     t.end();

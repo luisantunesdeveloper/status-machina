@@ -9,9 +9,6 @@ const test = tape.test;
 test('generic', generic => {
   const config = (afterS1, beforeS1) => ({
     s1: {
-      // on: {
-      //   actions: [],
-      // },
       s1: {}, // same state transition
       s2: {
         after: [afterS1],
@@ -19,18 +16,11 @@ test('generic', generic => {
       },
     },
     s2: {
-      // on: {
-      //   actions: [],
-      // },
       s3: {
         after: [afterS1],
       },
     },
-    s3: {
-      // on: {
-      //   actions: [],
-      // },
-    },
+    s3: {},
   });
 
   const afterS1 = args => args;
@@ -673,8 +663,6 @@ test('moore', moore => {
     });
 
   const config = {
-    // initial: 's0',
-    // inputs: ['0', '1'],
     s0: {
       on: {
         outputs: outputFn0,
@@ -704,7 +692,7 @@ test('moore', moore => {
 
     const sm = new StateMachine();
 
-    sm.configMoore(config)('s1').init('');
+    sm.configMoore(config)('s0').init('');
 
     await sm.transition('s1');
     t.isEqual(_spy.calledOnce, true, 'spy is called once');
@@ -721,7 +709,7 @@ test('moore', moore => {
 
     const sm = new StateMachine();
 
-    sm.configMoore(config)('s1').init('');
+    sm.configMoore(config)('s0').init('');
 
     await sm.transition('s1');
     await sm.transition('s2');
@@ -736,7 +724,7 @@ test('moore', moore => {
 
     const sm = new StateMachine();
 
-    sm.configMoore(config)('s1').init('');
+    sm.configMoore(config)('s0').init('');
 
     try {
       await sm.transition('s1');
@@ -765,8 +753,6 @@ test('mealy', moore => {
     });
 
   const config = {
-    // initial: 's0',
-    // inputs: ['0', '1'],
     s0: {
       on: {},
       s1: {

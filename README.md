@@ -2,6 +2,8 @@
 
 > a device that can be in one of a set number of stable conditions depending on its previous condition and on the present values of its inputs
 
+The complete documentation can be found [here](https://status-machina.gitbook.io/project/)
+
 ## State machines types
 
 Although the citation, for now status-machina has the following machines and features implemented. If appropriate an example will be given.
@@ -17,7 +19,7 @@ Although the citation, for now status-machina has the following machines and fea
 ### Mealy machines
 
 - [x] States and transitions
-- [x] Transitions produces output dependent on input
+- [x] Transitions produces output depending on the input
 
 ### Other features
 

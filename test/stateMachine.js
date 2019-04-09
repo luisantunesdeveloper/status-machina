@@ -754,7 +754,6 @@ test('mealy', moore => {
 
   const config = {
     s0: {
-      on: {},
       s1: {
         on: {
           input0: outputFn0,
@@ -762,16 +761,13 @@ test('mealy', moore => {
       },
     },
     s1: {
-      on: {},
       s2: {
         on: {
           input1: outputFn1,
         },
       },
     },
-    s2: {
-      on: {},
-    },
+    s2: {},
   };
 
   test('can execute a transition on a mealy mealy machine', async t => {

@@ -6,7 +6,6 @@ const config = {
     addTodo: {},
     changeTodo: {},
     listTodos: {},
-    removeTodo: {},
   },
   addTodo: {
     on: {},

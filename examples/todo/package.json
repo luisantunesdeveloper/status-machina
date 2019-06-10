@@ -10,9 +10,9 @@
   "author": "Luis Antunes",
   "license": "MIT",
   "dependencies": {
-    "@babel/polyfill": "^7.2.5",
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4"
+    "@babel/polyfill": "^7.4.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",

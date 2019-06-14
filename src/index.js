@@ -1,5 +1,3 @@
 'use strict';
 
-const StateMachine = require('./stateMachine');
-
-module.exports = StateMachine;
+module.exports = require('./machines');

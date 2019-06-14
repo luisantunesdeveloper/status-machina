@@ -2,12 +2,13 @@
 
 const Promise = require('bluebird');
 
-const types = {
-  mealy: 'mealy',
-  moore: 'moore',
-};
-
 class StateMachine {
+
+  constructor(states, initialState) {
+    this.states = states
+    this._setInitialState(initialState);
+  }
+
   attach(state, observerId, callback) {
     if (!this.states[state].on) {
       this.states[state].on = {};
@@ -19,21 +20,6 @@ class StateMachine {
 
     this.states[state].on.observers[observerId] = callback;
     return this;
-  }
-
-  configMealy(states) {
-    this.type = types.mealy;
-    return this.config(states);
-  }
-
-  configMoore(states) {
-    this.type = types.moore;
-    return this.config(states);
-  }
-
-  config(states) {
-    this._setStates(states);
-    return initialState => this._setInitialState(initialState);
   }
 
   dettach(state, observerId) {
@@ -63,13 +49,7 @@ class StateMachine {
     return this;
   }
 
-  async transition(toState, input) {
-    if (this.type && this.type === types.moore) {
-      return await this._transitionMoore(this.currentState, toState);
-    }
-    if (this.type && this.type === types.mealy) {
-      return await this._transitionMealy(this.currentState, toState, input);
-    }
+  async transition(toState) {
     return await this._transition(this.currentState, toState);
   }
 
@@ -116,12 +96,6 @@ class StateMachine {
     return Promise.all([]);
   }
 
-  _outputSanitization(toState, config) {
-    if (!config.on || !config.on.outputs) {
-      throw new Error(`${toState} does should have outputs property defined!`);
-    }
-  }
-
   _inputSanitization(fromState, toState, input) {
     if (
       !this.states[fromState][toState] ||
@@ -153,39 +127,6 @@ class StateMachine {
     return this;
   }
 
-  _setStates(states) {
-    this.states = states;
-    return this;
-  }
-
-  async _transitionMoore(fromState, toState) {
-    this._basicSanitization(fromState, toState);
-    this._outputSanitization(toState, this.states[toState]);
-
-    // execute the transaction
-    await this._executeTransition(toState, [this.states[toState].on.outputs]);
-
-    return Promise.resolve({
-      currentState: this.currentState,
-      data: this.data,
-    });
-  }
-
-  async _transitionMealy(fromState, toState, input) {
-    this._basicSanitization(fromState, toState);
-    this._inputSanitization(fromState, toState, input);
-
-    // execute the transaction
-    await this._executeTransition(toState, [
-      this.states[fromState][toState].on[input],
-    ]);
-
-    return Promise.resolve({
-      currentState: this.currentState,
-      data: this.data,
-    });
-  }
-
   async _transition(fromState, toState) {
     this._basicSanitization(fromState, toState);
 
@@ -214,4 +155,64 @@ class StateMachine {
   }
 }
 
-module.exports = StateMachine;
+class MealyStateMachine extends StateMachine {
+
+  constructor(states, initialState) {
+    super(states, initialState)
+  }
+
+  async transition(toState, input) {
+    return await this._transitionMealy(this.currentState, toState, input);
+  } 
+
+  async _transitionMealy(fromState, toState, input) {
+    this._basicSanitization(fromState, toState);
+    this._inputSanitization(fromState, toState, input);
+
+    // execute the transaction
+    await this._executeTransition(toState, [
+      this.states[fromState][toState].on[input],
+    ]);
+
+    return Promise.resolve({
+      currentState: this.currentState,
+      data: this.data,
+    });
+  }
+}
+
+class MooreStateMachine extends StateMachine {
+
+  constructor(states, initialState) {
+    super(states, initialState)
+  }
+
+  async transition(toState) {
+    return await this._transitionMoore(this.currentState, toState);
+  } 
+
+  async _transitionMoore(fromState, toState) {
+    this._basicSanitization(fromState, toState);
+    this._outputSanitization(toState, this.states[toState]);
+
+    // execute the transaction
+    await this._executeTransition(toState, [this.states[toState].on.outputs]);
+
+    return Promise.resolve({
+      currentState: this.currentState,
+      data: this.data,
+    });
+  }
+
+  _outputSanitization(toState, config) {
+    if (!config.on || !config.on.outputs) {
+      throw new Error(`${toState} does should have outputs property defined!`);
+    }
+  }
+}
+
+module.exports = {
+  StateMachine,
+  MealyStateMachine,
+  MooreStateMachine
+};

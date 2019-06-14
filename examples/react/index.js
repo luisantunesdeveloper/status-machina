@@ -12,7 +12,7 @@
 import '@babel/polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
-const StateMachine = require('../../src/index');
+const machines = require('../../src/index');
 
 // the Services user mock
 const user = {
@@ -49,10 +49,9 @@ const getConfig = beforeSecondState => ({
 // create a new state machine
 // with states, initial state and
 // state changes observers
-const sm = new StateMachine();
 const beforeSecondState = new Services().getUser;
 const states = getConfig(beforeSecondState);
-sm.config(states)('firstState');
+const sm = new machines.StateMachine(states, 'firstState');
 
 class SMExample extends React.Component {
   componentDidMount() {

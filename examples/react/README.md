@@ -9,7 +9,7 @@ npm i
 ## Run
 
 ```sh
-npm run
+npm run start
 ```
 
 [Open browser](http://localhost:1234)

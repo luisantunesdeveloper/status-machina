@@ -1,6 +1,6 @@
-const StateMachine = require('../../../src/index');
+const machines = require('../../../src/index');
 
-const config = {
+const states = {
   listTodos: {
     on: {},
     addTodo: {},
@@ -19,7 +19,6 @@ const config = {
 
 // create a new state machine
 // with states and initial state
-const store = new StateMachine();
-store.configMoore(config)('listTodos');
+const store = new machines.MooreStateMachine(states, 'listTodos');
 
 export default store;

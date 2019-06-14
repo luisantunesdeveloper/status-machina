@@ -6,7 +6,7 @@
  * y=g(X)
  */
 
-const StateMachine = require('../../src/index');
+const machines = require('../../src/index');
 
 const outputFn0 = data =>
   new Promise(resolve => {
@@ -18,7 +18,7 @@ const outputFn1 = data =>
     resolve(data + '1');
   });
 
-const config = {
+const states = {
   // initial: 's0',
   // inputs: ['0', '1'],
   s0: {
@@ -45,8 +45,8 @@ new Promise(resolve => {
   // create a new state machine
   // with states, initial state and
   // state changes observers
-  const sm = new StateMachine();
-  sm.configMoore(config)('s0').init('');
+  const sm = new machines.MooreStateMachine(states, 's0');
+  sm.init('');
   resolve(sm);
 }).then(async sm => {
   try {

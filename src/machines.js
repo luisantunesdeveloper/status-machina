@@ -4,9 +4,10 @@ const Promise = require('bluebird');
 
 class StateMachine {
 
-  constructor(states, initialState) {
+  constructor(states, initialState, data) {
     this.states = states
-    this._setInitialState(initialState);
+    this.initialState = initialState;
+    this.data = data;
   }
 
   attach(state, observerId, callback) {
@@ -34,19 +35,8 @@ class StateMachine {
     return this;
   }
 
-  getState() {
-    return this.currentState;
-  }
-
-  /**
-   * TODO: should we keep the data inside or build a new
-   * store in order to diff the data from previousState
-   * @param {*} initData
-   */
-  init(initData) {
-    this.data = initData;
-    this._transition(undefined, this.initialState);
-    return this;
+  async init() {
+    return await this._transition(undefined, this.initialState);
   }
 
   async transition(toState) {
@@ -122,11 +112,6 @@ class StateMachine {
     return this;
   }
 
-  _setInitialState(initialState) {
-    this.initialState = initialState;
-    return this;
-  }
-
   async _transition(fromState, toState) {
     this._basicSanitization(fromState, toState);
 
@@ -148,6 +133,8 @@ class StateMachine {
 
     // notify every state listener
     this._notifyStateListeners(toState);
+
+    // resolve the promise
     return Promise.resolve({
       currentState: this.currentState,
       data: this.data,
@@ -157,8 +144,8 @@ class StateMachine {
 
 class MealyStateMachine extends StateMachine {
 
-  constructor(states, initialState) {
-    super(states, initialState)
+  constructor(states, initialState, data) {
+    super(states, initialState, data)
   }
 
   async transition(toState, input) {
@@ -183,8 +170,8 @@ class MealyStateMachine extends StateMachine {
 
 class MooreStateMachine extends StateMachine {
 
-  constructor(states, initialState) {
-    super(states, initialState)
+  constructor(states, initialState, data) {
+    super(states, initialState, data)
   }
 
   async transition(toState) {

@@ -54,11 +54,11 @@ const states = getConfig(beforeSecondState);
 const sm = new machines.StateMachine(states, 'firstState');
 
 class SMExample extends React.Component {
-  componentDidMount() {
+  async componentDidMount() {
     // first attach the listeners and then start the state machine
     sm.attach('firstState', 'SMExample', () => this.setState({ data: {} }))
       .attach('secondState', 'SMExample', data => this.setState({ data }))
-      .init();
+    await sm.init()
   }
 
   componentWillUnmount() {
@@ -72,10 +72,10 @@ class SMExample extends React.Component {
     // in this case the two onClicks below
     return (
       <div>
-        <p>{sm.getState()}</p>
+        <p>{sm.currentState}</p>
         <button onClick={() => sm.transition('secondState')}> Click</button>
         <span> </span>
-        {sm.getState() !== 'firstState' && (
+        {sm.currentState !== 'firstState' && (
           <button onClick={() => sm.transition('firstState')}> Back</button>
         )}
         {this.state && this.state.data && this.state.data.name && (

@@ -19,6 +19,4 @@ const states = {
 
 // create a new state machine
 // with states and initial state
-const store = new machines.MooreStateMachine(states, 'listTodos');
-
-export default store;
+export const store = new machines.MooreStateMachine(states, 'listTodos');

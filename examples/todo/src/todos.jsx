@@ -1,14 +1,18 @@
 import React from 'react';
 import { initData, getTodos, postTodo, putTodo } from './services';
-import store from './store';
+import { store } from './store';
 import Todo from './todo';
 
 export default class Todos extends React.Component {
   componentWillMount() {
-    store.init(initData);
+    store.data = initData
     this.addTodo = this.addTodo.bind(this);
     this.changeTodo = this.changeTodo.bind(this);
     this.listFilteredTodos = this.listFilteredTodos.bind(this);
+  }
+
+  async componentDidMount() {
+    await store.init();
   }
 
   async addTodo(event) {

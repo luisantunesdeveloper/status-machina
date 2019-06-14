@@ -41,12 +41,12 @@ const states = {
   },
 };
 
-new Promise(resolve => {
+new Promise(async resolve => {
   // create a new state machine
   // with states, initial state and
   // state changes observers
-  const sm = new machines.MooreStateMachine(states, 's0');
-  sm.init('');
+  const sm = new machines.MooreStateMachine(states, 's0', '');
+  await sm.init();
   resolve(sm);
 }).then(async sm => {
   try {

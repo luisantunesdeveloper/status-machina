@@ -27,12 +27,12 @@ test('generic', generic => {
 
   const beforeS1 = args => args;
 
-  test('can have states defined', t => {
+  test('can have states defined', async t => {
     t.plan(4);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1')
-    sm.init()
+    await sm.init()
 
     t.isNot(sm, undefined, 'state machine is not undefined');
     t.isEqual(sm.initialState, 's1', 'initial state s1 is defined');
@@ -127,9 +127,9 @@ test('generic', generic => {
     const sm = new machines.StateMachine(states, 's1');
     sm.init();
 
-    t.isEqual(sm.getState(), 's1', 'state is the initial state s1');
+    t.isEqual(sm.currentState, 's1', 'state is the initial state s1');
     await sm.transition('s2');
-    t.isEqual(sm.getState(), 's2', 'state transitioned from s1 to s2');
+    t.isEqual(sm.currentState, 's2', 'state transitioned from s1 to s2');
 
     t.end();
   });
@@ -141,9 +141,9 @@ test('generic', generic => {
     const sm = new machines.StateMachine(states, 's1');
     sm.init();
 
-    t.isEqual(sm.getState(), 's1', 'state is the initial state s1');
+    t.isEqual(sm.currentState, 's1', 'state is the initial state s1');
     await sm.transition('s1');
-    t.isEqual(sm.getState(), 's1', 'state transitioned from s1 to s1');
+    t.isEqual(sm.currentState, 's1', 'state transitioned from s1 to s1');
 
     t.end();
   });
@@ -155,7 +155,7 @@ test('generic', generic => {
     const sm = new machines.StateMachine(states, 's2');
     sm.init();
 
-    t.isEqual(sm.getState(), 's2', 'state is the initial state s1');
+    t.isEqual(sm.currentState, 's2', 'state is the initial state s1');
     try {
       await sm.transition('s2');
     } catch (error) {
@@ -203,13 +203,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can attach a listener to a state', t => {
+  test('can attach a listener to a state', async t => {
     t.plan(1);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s2', '1', () => {});
+    await sm.init()
+    sm.attach('s2', '1', () => {});
     t.isEqual(
       Object.keys(sm.states['s2'].on.observers).length,
       1,
@@ -219,13 +219,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can dettach a listener from a state', t => {
+  test('can dettach a listener from a state', async t => {
     t.plan(1);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s2', '1', () => {})
+    await sm.init()
+    sm.attach('s2', '1', () => {})
       .dettach('s2', '1');
 
     t.isEqual(
@@ -237,13 +237,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can attach more than a listener to a state', t => {
+  test('can attach more than a listener to a state', async t => {
     t.plan(1);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s2', '1', () => {})
+    await sm.init()
+    sm.attach('s2', '1', () => {})
       .attach('s2', '2', () => {});
 
     t.isEqual(
@@ -255,13 +255,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can dettach more than a listener from a state', t => {
+  test('can dettach more than a listener from a state', async t => {
     t.plan(1);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s2', '1', () => {})
+    await sm.init()
+    sm.attach('s2', '1', () => {})
       .attach('s2', '2', () => {})
       .dettach('s2', '1')
       .dettach('s2', '2');
@@ -275,13 +275,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can attach one listener to different states', t => {
+  test('can attach one listener to different states', async t => {
     t.plan(2);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s1', '1', () => {})
+    await sm.init()
+    sm.attach('s1', '1', () => {})
       .attach('s2', '2', () => {});
 
     t.isEqual(
@@ -299,13 +299,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can dettach one listener from different states', t => {
+  test('can dettach one listener from different states', async t => {
     t.plan(2);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s1', '1', () => {})
+    await sm.init()
+    sm.attach('s1', '1', () => {})
       .attach('s2', '2', () => {})
       .dettach('s1', '1')
       .dettach('s1', '2');
@@ -325,13 +325,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can attach more than one listener to different states', t => {
+  test('can attach more than one listener to different states', async t => {
     t.plan(2);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s1', '1', () => {})
+    await sm.init()
+    sm.attach('s1', '1', () => {})
       .attach('s1', '2', () => {})
       .attach('s2', '1', () => {})
       .attach('s2', '2', () => {});
@@ -351,13 +351,13 @@ test('generic', generic => {
     t.end();
   });
 
-  test('can dettach more than one listener from different states', t => {
+  test('can dettach more than one listener from different states', async t => {
     t.plan(2);
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s1', '1', () => {})
+    await sm.init()
+    sm.attach('s1', '1', () => {})
       .attach('s1', '2', () => {})
       .attach('s2', '1', () => {})
       .attach('s2', '2', () => {})
@@ -386,8 +386,8 @@ test('generic', generic => {
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s1', '1', () => {})
+    await sm.init()
+    sm.attach('s1', '1', () => {})
       .attach('s1', '2', () => {})
       .attach('s2', '1', () => {
         t.pass('s2 observer, id 1 got called');
@@ -406,8 +406,8 @@ test('generic', generic => {
 
     const states = config();
     const sm = new machines.StateMachine(states, 's1');
-    sm.init()
-      .attach('s1', '1', () => {})
+    await sm.init()
+    sm.attach('s1', '1', () => {})
       .attach('s1', '2', () => {})
       .attach('s2', '1', () => {})
       .attach('s2', '2', () => {})
@@ -428,10 +428,10 @@ test('generic', generic => {
     t.plan(1);
 
     const states = config();
-    const sm = new machines.StateMachine(states, 's1');
     const initData = { prop1: 'value1' };
-    sm.init(initData)
-      .attach('s2', '1', observedData => {
+    const sm = new machines.StateMachine(states, 's1', initData);
+    await sm.init()
+    sm.attach('s2', '1', observedData => {
         t.isEqual(
           initData,
           observedData,
@@ -454,10 +454,10 @@ test('generic', generic => {
       });
 
     const states = config(undefined, before);
-    const sm = new machines.StateMachine(states, 's1');
     const initData = { prop1: 'value1' };
-    sm.init(initData)
-      .attach('s2', '1', observedData => {
+    const sm = new machines.StateMachine(states, 's1', initData);
+    await sm.init()
+    sm.attach('s2', '1', observedData => {
         t.isEqual(
           observedData.prop1,
           'value2',
@@ -481,10 +481,10 @@ test('generic', generic => {
       });
 
     const states = config(after);
-    const sm = new machines.StateMachine(states, 's1');
     const initData = { prop1: 'value1' };
-    sm.init(initData)
-      .attach('s2', '1', observedData => {
+    const sm = new machines.StateMachine(states, 's1', initData);
+    await sm.init()
+    sm.attach('s2', '1', observedData => {
         t.isEqual(
           observedData.prop1,
           'value3',
@@ -520,10 +520,10 @@ test('generic', generic => {
       });
 
     const states = config(after, before);
-    const sm = new machines.StateMachine(states, 's1');
     const initData = { prop1: 'value1' };
-    sm.init(initData)
-      .attach('s2', '1', observedData => {
+    const sm = new machines.StateMachine(states, 's1', initData);
+    await sm.init()
+    sm.attach('s2', '1', observedData => {
         t.isEqual(
           observedData.prop1,
           'value3',
@@ -556,11 +556,11 @@ test('generic', generic => {
       });
 
     const states = config(changeState, changeState);
-    const sm = new machines.StateMachine(states, 's1');
     const initData = { prop1 };
+    const sm = new machines.StateMachine(states, 's1', initData);
 
-    sm.init(initData)
-      .attach('s2', '1', observedData => {
+    await sm.init()
+    sm.attach('s2', '1', observedData => {
         t.isEqual(
           observedData.prop1,
           2,
@@ -591,7 +591,7 @@ test('generic', generic => {
 
     const states = config(undefined, before);
     const sm = new machines.StateMachine(states, 's1');
-    sm.init();
+    await sm.init();
 
     try {
       await sm.transition('s2');
@@ -616,7 +616,7 @@ test('generic', generic => {
 
     const states = config(after);
     const sm = new machines.StateMachine(states, 's1');
-    sm.init();
+    await sm.init();
 
     try {
       await sm.transition('s2');
@@ -673,11 +673,11 @@ test('moore', moore => {
 
     states.s1.on = { outputs: _spy };
 
-    const sm = new machines.MooreStateMachine(states, 's1');
+    const sm = new machines.MooreStateMachine(states, 's1', '');
 
-    sm.init('');
-
+    await sm.init();
     await sm.transition('s1');
+
     t.isEqual(_spy.calledOnce, true, 'spy is called once');
     t.isEqual(sm.data, '0', 'data for the state is changed');
     t.end();
@@ -690,8 +690,8 @@ test('moore', moore => {
 
     states.s1.on = { outputs: _spy };
 
-    const sm = new machines.MooreStateMachine(states, 's0');
-    sm.init('');
+    const sm = new machines.MooreStateMachine(states, 's0', '');
+    await sm.init();
 
     await sm.transition('s1');
     await sm.transition('s2');
@@ -704,8 +704,8 @@ test('moore', moore => {
 
     delete states.s1.on.outputs;
 
-    const sm = new machines.MooreStateMachine(states, 's0');
-    sm.init('');
+    const sm = new machines.MooreStateMachine(states, 's0', '');
+    await sm.init();
 
     try {
       await sm.transition('s1');
@@ -758,10 +758,10 @@ test('mealy', mealy => {
 
     states.s0.s1.on = { input0: _spy };
 
-    const sm = new machines.MealyStateMachine(states, 's0');
-    sm.init('');
-
+    const sm = new machines.MealyStateMachine(states, 's0', '');
+    await sm.init();
     await sm.transition('s1', 'input0');
+
     t.isEqual(_spy.calledOnce, true, 'spy is called once');
     t.isEqual(sm.data, '0', 'data for the state is changed');
     t.end();
@@ -776,11 +776,11 @@ test('mealy', mealy => {
     states.s0.s1.on = { input0: _spy0 };
     states.s1.s2.on = { input1: _spy1 };
 
-    const sm = new machines.MealyStateMachine(states, 's0');
-    sm.init('');
-
+    const sm = new machines.MealyStateMachine(states, 's0', '');
+    await sm.init();
     await sm.transition('s1', 'input0');
     await sm.transition('s2', 'input1');
+
     t.isEqual(sm.data, '01', 'data for the state is changed');
     t.end();
   });
@@ -790,8 +790,8 @@ test('mealy', mealy => {
 
     delete states.s0.s1.on.input0;
 
-    const sm = new machines.MealyStateMachine(states, 's0');
-    sm.init('');
+    const sm = new machines.MealyStateMachine(states, 's0', '');
+    await sm.init();
 
     try {
       await sm.transition('s1', 'input0');

@@ -2,17 +2,14 @@ const machines = require('../../../src/index');
 
 const states = {
   listTodos: {
-    on: {},
     addTodo: {},
     changeTodo: {},
     listTodos: {},
   },
   addTodo: {
-    on: {},
     listTodos: {},
   },
   changeTodo: {
-    on: {},
     listTodos: {},
   },
 };

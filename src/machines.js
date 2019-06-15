@@ -8,17 +8,23 @@ class StateMachine {
     this.states = states
     this.initialState = initialState;
     this.data = data;
+    this.addBasicProps()
+  }
+
+  addBasicProps() {
+    for(const name in this.states) {
+      if (!this.states[name].on) {
+        this.states[name].on = {};
+      }
+  
+      if (!this.states[name].on.observers) {
+        this.states[name].on.observers = {};
+      }
+    }
+    return this;
   }
 
   attach(state, observerId, callback) {
-    if (!this.states[state].on) {
-      this.states[state].on = {};
-    }
-
-    if (!this.states[state].on.observers) {
-      this.states[state].on.observers = {};
-    }
-
     this.states[state].on.observers[observerId] = callback;
     return this;
   }
